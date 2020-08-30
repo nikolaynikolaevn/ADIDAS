@@ -1,10 +1,11 @@
+/* functions.c */
+
 #include <stdio.h>
+#include <stdint.h>
 #include "functions.h"
 
-#define HI_NIBBLE(b) (((b) >> 4) & 0x0F)
+#define HI_NIBBLE(b) ((b) >> 4)
 #define LO_NIBBLE(b) ((b) & 0x0F)
-
-FILE *fpRead, *fpWrite;
 
 void to_binary(uint8_t b) {
     for (int i = 0; i < 8; i++) {
@@ -25,7 +26,7 @@ uint8_t get_bit(uint8_t b, uint8_t pos)
     return (b & tmp) >> pos;
 }
 
-int write_byte_to_file(uint8_t b, int* bytesEncodedCount) {
+int write_byte_to_file(uint8_t b, int* bytesEncodedCount, FILE *fpWrite) {
     int bytesWritten = fwrite(&b, sizeof(uint8_t), 1, fpWrite);
 
     if (bytesWritten != 1) {
@@ -38,25 +39,25 @@ int write_byte_to_file(uint8_t b, int* bytesEncodedCount) {
     return 0;
 }
 
-int encode_nibble_byte(uint8_t b, int* bytesEncodedCount) {
-    printf("Before: ");
-    to_binary(b);
+int encode_nibble_byte(uint8_t b, int* bytesEncodedCount, FILE *fpWrite) {
+    // printf("Before: ");
+    // to_binary(b);
 
     // Data bits
-    int d0 = get_bit(b, 0);
-    int d1 = get_bit(b, 1);
-    int d2 = get_bit(b, 2);
-    int d3 = get_bit(b, 3);
+    uint8_t d0 = get_bit(b, 0);
+    uint8_t d1 = get_bit(b, 1);
+    uint8_t d2 = get_bit(b, 2);
+    uint8_t d3 = get_bit(b, 3);
 
     // Encode
 
     // Parity bits
-    int p0 = d0 ^ d1 ^ d2;
-    printf("First parity bit: %d\n", p0);
-    int p1 = d0 ^ d1 ^ d3;
-    printf("Second parity bit: %d\n", p1);
-    int p2 = d1 ^ d2 ^ d3;
-    printf("Third parity bit: %d\n", p2);
+    uint8_t p0 = d0 ^ d1 ^ d2;
+    // printf("First parity bit: %d\n", p0);
+    uint8_t p1 = d0 ^ d1 ^ d3;
+    // printf("Second parity bit: %d\n", p1);
+    uint8_t p2 = d1 ^ d2 ^ d3;
+    // printf("Third parity bit: %d\n", p2);
 
     b <<= 3; // Shift 3 bits to the left to make space for parity bits
 
@@ -68,15 +69,16 @@ int encode_nibble_byte(uint8_t b, int* bytesEncodedCount) {
     if (p2 == 1)
         b = set_bit(b, 2);
 
-    write_byte_to_file(b, bytesEncodedCount);
+    write_byte_to_file(b, bytesEncodedCount, fpWrite);
 
-    printf("\nAfter:  ");
-    to_binary(b);
+    // printf("\nAfter:  ");
+    // to_binary(b);
 
     return 0;
 }
 
 int encode_file(char* inputFileName, char* outputFileName, int* charsReadCount, int* bytesEncodedCount) {
+	FILE *fpRead, *fpWrite;
     fpRead = fopen(inputFileName, "rb");
     fpWrite = fopen(outputFileName, "wb");
 
@@ -93,13 +95,13 @@ int encode_file(char* inputFileName, char* outputFileName, int* charsReadCount, 
     uint8_t b;
     while (fread(&b, sizeof(uint8_t), 1, fpRead) != 0) {
         (*charsReadCount)++;
-        printf("Char %c\n\n", b);
+        // printf("Char %c\n\n", b);
 
-        printf("High nibble\n");
-        encode_nibble_byte(HI_NIBBLE(b), bytesEncodedCount);
+        // printf("High nibble\n");
+        encode_nibble_byte(HI_NIBBLE(b), bytesEncodedCount, fpWrite);
 
-        printf("\nLow nibble\n");
-        encode_nibble_byte(LO_NIBBLE(b), bytesEncodedCount);
+        // printf("\nLow nibble\n");
+        encode_nibble_byte(LO_NIBBLE(b), bytesEncodedCount, fpWrite);
     }
     fclose(fpRead);
     fclose(fpWrite);

@@ -1,14 +1,15 @@
+/* functions.c */
+
 #include <stdio.h>
+#include <stdint.h>
 #include "functions.h"
 
 #define HI_NIBBLE(b) (((b) & 0x78) << 1)
 #define LO_NIBBLE(b) (((b) & 0x78) >> 3)
 
-FILE *fpRead, *fpWrite;
-
 uint8_t count_set_bits(uint8_t b)
 {
-    uint8_t mask = 0x80; // to ignore MSB errors
+    uint8_t mask = 0x80;
     uint8_t count = 0;
     for (uint8_t i = 0; i < 8; i++)
     {
@@ -19,7 +20,7 @@ uint8_t count_set_bits(uint8_t b)
     return count;
 }
 
-int write_byte_to_file(uint8_t b, int* charsDecodedCount) {
+int write_byte_to_file(uint8_t b, int* charsDecodedCount, FILE *fpWrite) {
     int bytesWritten = fwrite(&b, sizeof(uint8_t), 1, fpWrite);
 
     if (bytesWritten != 1) {
@@ -71,17 +72,18 @@ uint8_t repair_byte(uint8_t b) {
     return b;
 }
 
-int decode_bytes_to_char(uint8_t b1, uint8_t b2, int* charsDecodedCount) {
+int decode_bytes_to_char(uint8_t b1, uint8_t b2, int* charsDecodedCount, FILE *fpWrite) {
     uint8_t MSB = HI_NIBBLE(repair_byte(b1));
     uint8_t LSB = LO_NIBBLE(repair_byte(b2));
     uint8_t ch = MSB | LSB;
 
-    write_byte_to_file(ch, charsDecodedCount);
+    write_byte_to_file(ch, charsDecodedCount, fpWrite);
 
     return 0;
 }
 
 int decode_file(char* inputFileName, char* outputFileName, int* bytesReadCount, int* charsDecodedCount) {
+	FILE *fpRead, *fpWrite;
     fpRead = fopen(inputFileName, "rb");
     fpWrite = fopen(outputFileName, "wb");
 
@@ -98,7 +100,7 @@ int decode_file(char* inputFileName, char* outputFileName, int* bytesReadCount, 
     uint8_t bytes[2];
     while (fread(&bytes, 2, 1, fpRead) == 1) {
         (*bytesReadCount) += 2;
-        decode_bytes_to_char(bytes[0], bytes[1], charsDecodedCount);
+        decode_bytes_to_char(bytes[0], bytes[1], charsDecodedCount, fpWrite);
     }
     fclose(fpRead);
     fclose(fpWrite);

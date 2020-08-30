@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
     }
 	
 	int bytesReadCount = 0, bytesEncodedCount = 0;
-	int flippedBitCounts[8];
+	int flippedBitCounts[8] = {0};
 
     srand(time(NULL));
     encode_file(argv[1], argv[2], &bytesReadCount, &bytesEncodedCount, flippedBitCounts);

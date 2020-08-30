@@ -25,8 +25,8 @@ void to_binary(uint8_t b) {
 }
 
 int corrupt_byte(uint8_t b, int* bytesEncodedCount, int* flippedBitCounts, FILE *fpWrite) {
-    printf("Before: ");
-    to_binary(b);
+    // printf("Before: ");
+    // to_binary(b);
 
     // Encode
 
@@ -40,8 +40,8 @@ int corrupt_byte(uint8_t b, int* bytesEncodedCount, int* flippedBitCounts, FILE 
 
     write_byte_to_file(b, fpWrite);
 
-    printf("\nAfter:  ");
-    to_binary(b);
+    // printf("\nAfter:  ");
+    // to_binary(b);
 
     (*bytesEncodedCount)++;
 
@@ -66,7 +66,7 @@ int encode_file(char* inputFileName, char* outputFileName, int* bytesReadCount, 
     }
     while (fread(&b, sizeof(uint8_t), 1, fpRead) != 0) {
         (*bytesReadCount)++;
-        printf("Char %c\n\n", b);
+        // printf("Char %c\n\n", b);
         corrupt_byte(b, bytesEncodedCount, flippedBitCounts, fpWrite);
     }
     fclose(fpRead);
