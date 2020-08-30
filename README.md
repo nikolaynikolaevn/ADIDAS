@@ -40,4 +40,4 @@ The program prints at the end how many bytes are read and how many characters ar
 Use: **decode** *inputfile outputfile*
 
 
-Developed as a personal assignment during the Fontys PRC1 course.
+##### Developed as a personal assignment during the Fontys PRC1 course.
